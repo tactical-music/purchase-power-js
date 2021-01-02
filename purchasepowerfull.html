@@ -1,0 +1,64 @@
+<html>
+<head>
+    <title>Purchase Power of Cryptocurrency in a given country.</title>
+</head>
+<script type="text/javascript">
+
+    var coin, country, price, adjPrice;
+
+    function countryListener()
+    {
+        var countryInfo = JSON.parse(this.responseText);
+        if (("ppp" in countryInfo)==false)
+        {
+            document.getElementById('answer').innerHTML = '<b>Not found. Make sure your coin symbol and country symbol are valid.</b>';
+        }
+        else
+        {
+            var ppp = countryInfo.ppp.pppConversionFactor;
+            var adjPrice = price/ppp;
+            document.getElementById('answer').innerHTML = "<b>Purchase parity power conversion factor: " + ppp + "<br/>" + adjPrice + " USD is the purchasing power of 1 "+coin+" in "+country+"</br>";
+        }
+   }
+
+    function reqListener ()
+    {
+        obj = JSON.parse(this.responseText);
+        price = obj.price;
+        //{"mins":5,"price":"32776.7662"}
+        var purchCall = "https://api.purchasing-power-parity.com/?target="+country;
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", countryListener);
+        oReq.open("GET", purchCall);
+        oReq.send();
+    }
+
+    function power()
+    {
+        coin = document.getElementById('coin').value;
+        country = document.getElementById('country').value;
+
+        var binCall = "https://api.binance.us/api/v3/avgPrice?symbol="+coin.toUpperCase()+"USD";
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", reqListener);
+        oReq.open("GET", binCall);
+        oReq.send();
+
+    }
+</script>
+
+<div>Enter a cryptocurrency symbol listed on BinanceUS and an ISO Country Code to see the purchasing power in that country.
+<br/>
+For example, enter "BTC" and "FJ" to lookup the purchasing power of one Bitcoin in Fiji.
+    <br/><br/>
+</div>
+<form id="myform"  method="post">
+    Coin symbol: <input id='coin' type="text" name="query"> Country symbol: <input id='country' type="text" name="query">
+    <a href="javascript: power()">LOOKUP</a>
+</form>
+<div id='answer'>...</div>
+<br/>
+<br/>
+<br/>
+<div>Data will be retrieved from BinanceUS and purchasing-power-parity.com.<br/>Purchasing power is a look at the cost, relative to the US dollar, of food, housing, transportation, and utilities.</div>
+</html>
